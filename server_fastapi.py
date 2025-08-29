@@ -1,19 +1,21 @@
 from fastapi import FastAPI
+from fastapi.responses import PlainTextResponse
+
 from uvicorn import run
 
 app = FastAPI()
 
 @app.get("/")
 def read_root():
-    return {"Name": "Sam"}
+    return {"MyName": "Sam"}
 
 @app.get("/model_not_valid")
 def read_item():
     return {"not_valid_model": True}
 
-@app.get("/malformed_json")
+@app.get("/malformed_json", response_class=PlainTextResponse)
 def read_item():
-    return f"{'malformed_json': True unquoted_value}"
+    return f"Ciao"
 
 @app.get("/raise_exception")
 def create_item():

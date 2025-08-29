@@ -16,7 +16,7 @@ async def call(url):
         async with aiohttp.ClientSession() as session:
 
             async with session.get(url=url) as response:
-                print(f"No exception, status: {response.status}")
+                print(f"No exception from aiohttp call, status: {response.status}")
                 response_json = await response.json()
                 print(f"Response: {json.dumps(response_json, indent=2)}")
                 ResponseModel.model_validate(response_json)

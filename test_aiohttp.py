@@ -69,6 +69,13 @@ def save_result(process_info: ProcessInfo):
 
     reset_color()
 
+    try:
+        # save result to db
+        pass
+    except Exception as e:
+        return False
+    
+    return True
 
 async def initialization(url, process_info: ProcessInfo):
 
@@ -91,6 +98,8 @@ async def initialization(url, process_info: ProcessInfo):
 
             process_info.the_name = process_info.initialization_response.MyName
 
+            if process_info.initialization_response.MyName[0] != "1":
+                raise Exception("Numero pagamento non valid")
 
 async def confirm_payment(url, process_info: ProcessInfo):
 
@@ -112,6 +121,20 @@ async def remove_lock():
     pass
 
 
+async def check_max_date():
+
+    body_no_valid = False
+
+    if body_no_valid:
+        raise Exception("Max date not valid")
+
+async def check_body():
+
+    body_no_valid = False
+
+    if body_no_valid:
+        raise Exception("The body is not valid")
+
 async def do_job(url) -> ProcessInfo:
 
     process_info = ProcessInfo()
@@ -120,7 +143,7 @@ async def do_job(url) -> ProcessInfo:
     process_info.status = "ERROR"
 
     try:
-        await set_lock()
+        
         await initialization(url, process_info)
         await confirm_payment(url, process_info)
 
@@ -133,19 +156,41 @@ async def do_job(url) -> ProcessInfo:
 
         process_info.error = traceback.format_exc(limit=5, chain=False)
 
-    finally:
-        await remove_lock()
-
     return process_info
 
+def save_result_running():
+    pass
+
+async def check_prerequisite():
+
+    try:
+        await check_max_date()
+        await check_body()
+    except Exception as e:
+        # log...
+        return True
+    
+    return False
 
 async def create_payment(url, scenario) -> None:
 
     log_start(url, scenario)
 
+    errors = await check_prerequisite()
+
+    if errors:
+        return
+
+    await set_lock()
+
+    save_result_running()
+
     process_info = await do_job(url)
 
-    save_result(process_info)
+    result_saved = save_result(process_info)
+
+    if result_saved:
+        await remove_lock()
 
 
 async def main():
